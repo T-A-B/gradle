@@ -58,11 +58,20 @@ public class GeneratePluginDescriptors extends DefaultTask {
         );
     }
 
+    /**
+     * Because of {@link PluginDeclaration} is not cacheable, the caching is handled by {@link #getImplementationClassById()}
+     */
     @Internal("The relevant data is tracked via implementationClassById")
     public ListProperty<PluginDeclaration> getDeclarations() {
         return declarations;
     }
 
+    /**
+     * Returns all {@code (id, implementation class)} pairs from {@link #getDeclarations()}.
+     * <p>
+     * This map will be responsible for guiding the input caching of this task,
+     * as {@link PluginDeclaration} is a non-cacheable object.
+     */
     @Input
     Provider<Map<String, String>> getImplementationClassById() {
         return implementationClassById;
