@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-import java.io.FileOutputStream
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.LinkOption
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
-
 plugins {
     id("java-library")
     id("org.gradle.kotlin.kotlin-dsl") // this is 'kotlin-dsl' without version
     id("gradlebuild.code-quality")
     id("gradlebuild.ktlint")
+    id("gradlebuild.ci-reporting")
 }
 
 java {

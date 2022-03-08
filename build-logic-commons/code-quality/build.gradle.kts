@@ -12,6 +12,8 @@ java {
 group = "gradlebuild"
 
 dependencies {
+    implementation("me.champeau.gradle:japicmp-gradle-plugin:0.3.0")
+    implementation("org.jlleitschuh.gradle:ktlint-gradle:10.0.0")
     implementation("org.gradle.kotlin.kotlin-dsl:org.gradle.kotlin.kotlin-dsl.gradle.plugin:2.2.0")
     implementation("org.gradle.kotlin:gradle-kotlin-dsl-conventions:0.7.0")
 }

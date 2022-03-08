@@ -17,6 +17,7 @@
 package gradlebuild.performance.tasks
 
 import com.google.common.collect.Sets
+import gradlebuild.ci.PublishingCiArtifacts
 import gradlebuild.integrationtests.tasks.DistributionTest
 import gradlebuild.performance.PerformanceTestService
 import gradlebuild.performance.ScenarioBuildResultData
@@ -54,7 +55,7 @@ import java.nio.charset.Charset
  */
 @CacheableTask
 @CompileStatic
-abstract class PerformanceTest extends DistributionTest {
+abstract class PerformanceTest extends DistributionTest implements PublishingCiArtifacts {
     public static final String TC_URL = "https://builds.gradle.org/viewLog.html?buildId="
     public static final Set<String> NON_CACHEABLE_VERSIONS = Sets.newHashSet("last", "nightly", "flakiness-detection-commit")
     private final Property<String> baselines = getProject().getObjects().property(String.class)
@@ -64,6 +65,11 @@ abstract class PerformanceTest extends DistributionTest {
     @Override
     String getPrefix() {
         "performance"
+    }
+
+    @Override
+    List<File> getArtifacts() {
+        return [reportDir.parentFile]
     }
 
     @OutputDirectory

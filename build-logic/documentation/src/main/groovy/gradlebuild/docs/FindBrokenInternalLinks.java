@@ -16,6 +16,7 @@
 
 package gradlebuild.docs;
 
+import gradlebuild.ci.PublishingCiArtifacts;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.UncheckedIOException;
@@ -27,6 +28,7 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -47,7 +49,7 @@ import java.util.regex.Pattern;
  * Checks adoc files for broken links.
  */
 @CacheableTask
-public abstract class FindBrokenInternalLinks extends DefaultTask {
+public abstract class FindBrokenInternalLinks extends DefaultTask implements PublishingCiArtifacts {
     private final Pattern linkPattern = Pattern.compile("<<([^,>]+)[^>]*>>");
     private final Pattern linkWithHashPattern = Pattern.compile("([a-zA-Z_0-9-.]*)#(.*)");
 
@@ -67,6 +69,12 @@ public abstract class FindBrokenInternalLinks extends DefaultTask {
             hasDeadLink(documentationRoot, file, errors);
         });
         reportErrors(errors, getReportFile().get().getAsFile());
+    }
+
+    @NotNull
+    @Override
+    public List<File> getArtifacts() {
+        return List.of(getReportFile().get().getAsFile());
     }
 
     private void reportErrors(Map<File, List<Error>> errors, File reportFile) {

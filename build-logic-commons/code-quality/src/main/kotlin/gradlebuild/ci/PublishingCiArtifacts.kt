@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package gradlebuild.testcleanup.extension
+package gradlebuild.ci
 
-import org.gradle.api.provider.MapProperty
-
+import java.io.File
 
 /**
- * An extension to work with {@see TestFilesCleanupService}.
- * We have to collect all information we need in this extension and pass them
- * to the build service.
+ * Indicates a task may publish some artifacts for CI.
+ * For example, `DistributionTest` publishes the test daemon registry directory,
+ * `PerformanceTest` publishes performance reports.
  */
-interface TestFilesCleanupBuildServiceRootExtension {
-    val projectStates: MapProperty<String, TestFilesCleanupProjectState>
+interface PublishingCiArtifacts {
+    /**
+     * The artifacts to publish.
+     */
+    fun getArtifacts(): List<File>
 }

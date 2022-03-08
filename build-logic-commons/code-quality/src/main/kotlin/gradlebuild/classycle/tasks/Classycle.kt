@@ -15,6 +15,7 @@
  */
 package gradlebuild.classycle.tasks
 
+import gradlebuild.ci.PublishingCiArtifacts
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -44,7 +45,7 @@ import javax.inject.Inject
 
 
 @CacheableTask
-abstract class Classycle : DefaultTask() {
+abstract class Classycle : PublishingCiArtifacts, DefaultTask() {
 
     @get:Classpath
     abstract val classycleClasspath: ConfigurableFileCollection
@@ -81,6 +82,8 @@ abstract class Classycle : DefaultTask() {
     @get:Inject
     protected
     abstract val antBuilder: IsolatedAntBuilder
+
+    override fun getArtifacts(): List<File> = listOf(reportFile.get().asFile)
 
     @TaskAction
     fun generate() {

@@ -16,6 +16,7 @@
 
 package gradlebuild.integrationtests.tasks
 
+import gradlebuild.ci.PublishingCiArtifacts
 import gradlebuild.cleanup.services.CachesCleaner
 import gradlebuild.integrationtests.model.GradleDistribution
 import org.gradle.api.Named
@@ -49,7 +50,7 @@ import java.util.SortedSet
  * or separately published libraries (like the Tooling API Jar).
  */
 @DisableCachingByDefault(because = "Abstract super-class, not to be instantiated directly")
-abstract class DistributionTest : Test() {
+abstract class DistributionTest : PublishingCiArtifacts, Test() {
 
     /**
      * To further categorize tests. (We should simplify this and get rid of the subclasses if possible)
@@ -137,6 +138,12 @@ abstract class DistributionTest : Test() {
         }
         super.executeTests()
     }
+
+    override fun getArtifacts(): List<File> = listOf(
+        gradleInstallationForTest.gradleUserHomeDir.dir("test-kit-daemon").get().asFile,
+        gradleInstallationForTest.gradleUserHomeDir.dir("kotlin-compiler-daemon").get().asFile,
+        gradleInstallationForTest.daemonRegistry.get().asFile
+    )
 }
 
 
