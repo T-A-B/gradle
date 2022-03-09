@@ -44,6 +44,7 @@ import java.util.Set;
 public class LocalTaskNode extends TaskNode {
     private final TaskInternal task;
     private final WorkValidationContext validationContext;
+    private final ResolveMutationsNode resolveMutationsNode = new ResolveMutationsNode(this);
     private ImmutableActionSet<Task> postAction = ImmutableActionSet.empty();
     private Set<Node> lifecycleSuccessors;
 
@@ -54,6 +55,7 @@ public class LocalTaskNode extends TaskNode {
     public LocalTaskNode(TaskInternal task, WorkValidationContext workValidationContext) {
         this.task = task;
         this.validationContext = workValidationContext;
+        resolveMutationsNode.require();
     }
 
     /**
@@ -215,6 +217,11 @@ public class LocalTaskNode extends TaskNode {
     private void addDestroyablesToMutations(FileCollection destroyables) {
         destroyables
             .forEach(file -> getMutationInfo().destroyablePaths.add(file.getAbsolutePath()));
+    }
+
+    @Override
+    public Node getPrepareNode() {
+        return resolveMutationsNode;
     }
 
     @Override

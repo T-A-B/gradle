@@ -58,11 +58,6 @@ public class OrdinalNode extends Node implements SelfExecutingNode {
     public void resolveDependencies(TaskDependencyResolver dependencyResolver, Action<Node> processHardSuccessor) { }
 
     @Override
-    public Set<Node> getFinalizers() {
-        return Collections.emptySet();
-    }
-
-    @Override
     public void resolveMutations() { }
 
     @Nullable

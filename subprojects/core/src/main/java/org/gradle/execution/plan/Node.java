@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -343,7 +344,17 @@ public abstract class Node implements Comparable<Node> {
         return dependencySuccessors.contains(successor);
     }
 
-    public abstract Set<Node> getFinalizers();
+    public Set<Node> getFinalizers() {
+        return Collections.emptySet();
+    };
+
+    /**
+     * Returns a node that should be executed prior to this node, once this node is ready to execute and it dependencies complete.
+     */
+    @Nullable
+    public Node getPrepareNode() {
+        return null;
+    }
 
     public MutationInfo getMutationInfo() {
         return mutationInfo;

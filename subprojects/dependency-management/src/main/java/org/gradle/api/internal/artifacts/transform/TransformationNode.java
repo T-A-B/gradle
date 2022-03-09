@@ -119,11 +119,6 @@ public abstract class TransformationNode extends Node implements SelfExecutingNo
 
     protected abstract CalculatedValueContainer<TransformationSubject, ?> getTransformedArtifacts();
 
-    @Override
-    public Set<Node> getFinalizers() {
-        return Collections.emptySet();
-    }
-
     @Nullable
     @Override
     public ResourceLock getProjectToLock() {

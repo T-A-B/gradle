@@ -47,6 +47,7 @@ import org.gradle.execution.plan.LocalTaskNode
 import org.gradle.execution.plan.Node
 import org.gradle.execution.plan.NodeExecutor
 import org.gradle.execution.plan.PlanExecutor
+import org.gradle.execution.plan.SelfExecutingNode
 import org.gradle.execution.plan.TaskDependencyResolver
 import org.gradle.execution.plan.TaskNodeDependencyResolver
 import org.gradle.execution.plan.TaskNodeFactory
@@ -106,6 +107,8 @@ class DefaultTaskExecutionGraphSpec extends AbstractExecutionPlanSpec {
             if (node instanceof LocalTaskNode) {
                 executedTasks << node.task
                 return true
+            } else if (node instanceof SelfExecutingNode) {
+                return true
             } else {
                 return false
             }
@@ -139,7 +142,7 @@ class DefaultTaskExecutionGraphSpec extends AbstractExecutionPlanSpec {
         def b = task("b")
 
         given:
-        cancellationToken.cancellationRequested >>> [false, true]
+        cancellationToken.cancellationRequested >>> [false, false, true]
 
         when:
         populateAndExecute([a, b])
@@ -155,7 +158,7 @@ class DefaultTaskExecutionGraphSpec extends AbstractExecutionPlanSpec {
         def b = task("b")
 
         given:
-        cancellationToken.cancellationRequested >>> [false, false, true]
+        cancellationToken.cancellationRequested >>> [false, false, false, false, true]
 
         when:
         populateAndExecute([a, b])

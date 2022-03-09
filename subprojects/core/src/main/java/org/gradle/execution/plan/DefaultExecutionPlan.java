@@ -670,24 +670,18 @@ public class DefaultExecutionPlan implements ExecutionPlan {
 
                 foundReadyNode = true;
 
-                if (!tryAcquireLocksForNode(node, resources)) {
-                    releaseLocks(resources);
-                    continue;
+                Node prepareNode = node.getPrepareNode();
+                if (prepareNode != null && prepareNode.isReady()) {
+                    if (attemptToStart(prepareNode, resources)) {
+                        node.addDependencySuccessor(prepareNode);
+                        return NodeSelection.of(prepareNode);
+                    }
                 }
 
-                MutationInfo mutations = getResolvedMutationInfo(node);
-
-                if (conflictsWithOtherNodes(node, mutations)) {
-                    releaseLocks(resources);
-                    continue;
+                if (attemptToStart(node, resources)) {
+                    iterator.remove();
+                    return NodeSelection.of(node);
                 }
-
-                node.startExecution(this::recordNodeExecutionStarted);
-                if (mutations.hasValidationProblem) {
-                    invalidNodeRunning = true;
-                }
-                iterator.remove();
-                return NodeSelection.of(node);
             } else if (!node.isComplete()) {
                 // Node is not yet complete
                 // - its dependencies are not yet complete
@@ -715,6 +709,27 @@ public class DefaultExecutionPlan implements ExecutionPlan {
         }
     }
 
+    private boolean attemptToStart(Node node, List<ResourceLock> resources) {
+        resources.clear();
+        if (!tryAcquireLocksForNode(node, resources)) {
+            releaseLocks(resources);
+            return false;
+        }
+
+        MutationInfo mutations = getResolvedMutationInfo(node);
+
+        if (conflictsWithOtherNodes(node, mutations)) {
+            releaseLocks(resources);
+            return false;
+        }
+
+        node.startExecution(this::recordNodeExecutionStarted);
+        if (mutations.hasValidationProblem) {
+            invalidNodeRunning = true;
+        }
+        return true;
+    }
+
     private void releaseLocks(List<ResourceLock> resources) {
         for (ResourceLock resource : resources) {
             resource.unlock();
@@ -722,7 +737,6 @@ public class DefaultExecutionPlan implements ExecutionPlan {
     }
 
     private boolean tryAcquireLocksForNode(Node node, List<ResourceLock> resources) {
-        resources.clear();
         if (!tryLockProjectFor(node, resources)) {
             LOGGER.debug("Cannot acquire project lock for node {}", node);
             return false;
@@ -1046,12 +1060,7 @@ public class DefaultExecutionPlan implements ExecutionPlan {
 
     @Override
     public boolean allExecutionComplete() {
-        for (Node node : nodeMapping) {
-            if (!node.isComplete()) {
-                return false;
-            }
-        }
-        return true;
+        return executionQueue.isEmpty() && runningNodes.isEmpty();
     }
 
     @Override

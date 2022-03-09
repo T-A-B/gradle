@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,28 +19,31 @@ package org.gradle.execution.plan;
 import org.gradle.api.Action;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.internal.tasks.NodeExecutionContext;
-import org.gradle.api.internal.tasks.TaskDependencyContainer;
-import org.gradle.api.internal.tasks.WorkNodeAction;
 import org.gradle.internal.resources.ResourceLock;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
-public class ActionNode extends Node implements SelfExecutingNode {
-    private final WorkNodeAction action;
-    private final ProjectInternal owningProject;
-    private final ProjectInternal projectToLock;
+public class ResolveMutationsNode extends Node implements SelfExecutingNode {
+    private final LocalTaskNode node;
 
-    public ActionNode(WorkNodeAction action) {
-        this.action = action;
-        this.owningProject = (ProjectInternal) action.getOwningProject();
-        if (owningProject != null && action.usesMutableProjectState()) {
-            this.projectToLock = owningProject;
-        } else {
-            this.projectToLock = null;
-        }
+    public ResolveMutationsNode(LocalTaskNode node) {
+        this.node = node;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    @Override
+    public String toString() {
+        return "Resolve mutations for " + node;
+    }
+
+    @Override
+    public int compareTo(Node o) {
+        return -1;
     }
 
     @Nullable
@@ -55,8 +58,11 @@ public class ActionNode extends Node implements SelfExecutingNode {
 
     @Override
     public void resolveDependencies(TaskDependencyResolver dependencyResolver, Action<Node> processHardSuccessor) {
-        TaskDependencyContainer dependencies = action::visitDependencies;
-        for (Node node : dependencyResolver.resolveDependenciesFor(null, dependencies)) {
+        // This node must run after the dependencies of the node have completed
+        for (Node node : node.getDependencySuccessors()) {
+            if (node == this) {
+                continue;
+            }
             addDependencySuccessor(node);
             processHardSuccessor.execute(node);
         }
@@ -64,45 +70,26 @@ public class ActionNode extends Node implements SelfExecutingNode {
 
     @Override
     public void resolveMutations() {
-        // Assume has no outputs that can be destroyed or that overlap with another node
-    }
-
-    public WorkNodeAction getAction() {
-        return action;
-    }
-
-    @Override
-    public String toString() {
-        return "work action " + action;
-    }
-
-    @Override
-    public int compareTo(Node o) {
-        return -1;
     }
 
     @Nullable
     @Override
     public ResourceLock getProjectToLock() {
-        if (projectToLock != null) {
-            return projectToLock.getOwner().getAccessLock();
-        }
-        return null;
+        return node.getProjectToLock();
     }
 
     @Nullable
     @Override
     public ProjectInternal getOwningProject() {
-        return owningProject;
+        return node.getOwningProject();
     }
 
     @Override
-    public List<ResourceLock> getResourcesToLock() {
+    public List<? extends ResourceLock> getResourcesToLock() {
         return Collections.emptyList();
     }
 
     @Override
     public void execute(NodeExecutionContext context) {
-        action.run(context);
     }
 }

@@ -988,7 +988,13 @@ class DefaultExecutionPlanTest extends AbstractExecutionPlanSpec {
     }
 
     List<Task> getExecutedTasks() {
-        return executedNodes*.task
+        def tasks = []
+        for (node in executedNodes) {
+            if (node instanceof LocalTaskNode) {
+                tasks << node.task
+            }
+        }
+        return tasks
     }
 
     List<Node> getExecutedNodes() {

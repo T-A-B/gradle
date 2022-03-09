@@ -896,6 +896,7 @@ class DefaultExecutionPlanParallelTest extends AbstractExecutionPlanSpec {
 
         then:
         invalidTaskNode.task == first
+        1 * nodeValidator.hasValidationProblems({ it instanceof ResolveMutationsNode }) >> false
         1 * nodeValidator.hasValidationProblems({ LocalTaskNode node -> node.task == first }) >> true
         0 * nodeValidator.hasValidationProblems(_ as Node)
 
@@ -903,6 +904,7 @@ class DefaultExecutionPlanParallelTest extends AbstractExecutionPlanSpec {
         def noTaskSelected = selectNextTask()
         then:
         noTaskSelected == null
+        1 * nodeValidator.hasValidationProblems({ it instanceof ResolveMutationsNode }) >> false
         1 * nodeValidator.hasValidationProblems({ LocalTaskNode node -> node.task == second }) >> false
         0 * nodeValidator.hasValidationProblems(_ as Node)
 
@@ -924,6 +926,7 @@ class DefaultExecutionPlanParallelTest extends AbstractExecutionPlanSpec {
 
         then:
         validTaskNode.task == first
+        1 * nodeValidator.hasValidationProblems({ it instanceof ResolveMutationsNode }) >> false
         1 * nodeValidator.hasValidationProblems({ LocalTaskNode node -> node.task == first }) >> false
         0 * nodeValidator.hasValidationProblems(_ as Node)
 
@@ -931,6 +934,7 @@ class DefaultExecutionPlanParallelTest extends AbstractExecutionPlanSpec {
         def noTaskSelected = selectNextTask()
         then:
         noTaskSelected == null
+        1 * nodeValidator.hasValidationProblems({ it instanceof ResolveMutationsNode }) >> false
         1 * nodeValidator.hasValidationProblems({ LocalTaskNode node -> node.task == second }) >> true
         0 * nodeValidator.hasValidationProblems(_ as Node)
 
