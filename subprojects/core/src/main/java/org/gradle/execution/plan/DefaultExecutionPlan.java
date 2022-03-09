@@ -671,9 +671,13 @@ public class DefaultExecutionPlan implements ExecutionPlan {
                 foundReadyNode = true;
 
                 Node prepareNode = node.getPrepareNode();
-                if (prepareNode != null && prepareNode.isReady()) {
-                    if (attemptToStart(prepareNode, resources)) {
+                if (prepareNode != null) {
+                    if (!prepareNode.isRequired()) {
+                        prepareNode.require();
+                    }
+                    if (prepareNode.isReady() && attemptToStart(prepareNode, resources)) {
                         node.addDependencySuccessor(prepareNode);
+                        node.forceAllDependenciesCompleteUpdate();
                         return NodeSelection.of(prepareNode);
                     }
                 }
@@ -800,10 +804,10 @@ public class DefaultExecutionPlan implements ExecutionPlan {
     private MutationInfo getResolvedMutationInfo(Node node) {
         MutationInfo mutations = node.getMutationInfo();
         if (!mutations.resolved) {
-            node.resolveMutations();
             mutations.hasValidationProblem = nodeValidator.hasValidationProblems(node);
             outputHierarchy.recordNodeAccessingLocations(node, mutations.outputPaths);
             destroyableHierarchy.recordNodeAccessingLocations(node, mutations.destroyablePaths);
+            mutations.resolved = true;
         }
         return mutations;
     }

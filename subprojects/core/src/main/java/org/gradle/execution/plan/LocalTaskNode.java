@@ -55,7 +55,6 @@ public class LocalTaskNode extends TaskNode {
     public LocalTaskNode(TaskInternal task, WorkValidationContext workValidationContext) {
         this.task = task;
         this.validationContext = workValidationContext;
-        resolveMutationsNode.require();
     }
 
     /**
@@ -244,8 +243,6 @@ public class LocalTaskNode extends TaskNode {
         } catch (Exception e) {
             throw new TaskExecutionException(task, e);
         }
-
-        mutations.resolved = true;
 
         if (!mutations.destroyablePaths.isEmpty()) {
             if (mutations.hasOutputs) {

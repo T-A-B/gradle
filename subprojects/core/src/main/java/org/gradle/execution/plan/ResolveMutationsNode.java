@@ -19,6 +19,7 @@ package org.gradle.execution.plan;
 import org.gradle.api.Action;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.internal.tasks.NodeExecutionContext;
+import org.gradle.internal.UncheckedException;
 import org.gradle.internal.resources.ResourceLock;
 
 import javax.annotation.Nullable;
@@ -27,6 +28,7 @@ import java.util.List;
 
 public class ResolveMutationsNode extends Node implements SelfExecutingNode {
     private final LocalTaskNode node;
+    private Exception failure;
 
     public ResolveMutationsNode(LocalTaskNode node) {
         this.node = node;
@@ -49,11 +51,12 @@ public class ResolveMutationsNode extends Node implements SelfExecutingNode {
     @Nullable
     @Override
     public Throwable getNodeFailure() {
-        return null;
+        return failure;
     }
 
     @Override
     public void rethrowNodeFailure() {
+        throw UncheckedException.throwAsUncheckedException(failure);
     }
 
     @Override
@@ -91,5 +94,10 @@ public class ResolveMutationsNode extends Node implements SelfExecutingNode {
 
     @Override
     public void execute(NodeExecutionContext context) {
+        try {
+            node.resolveMutations();
+        } catch (Exception e) {
+            failure = e;
+        }
     }
 }

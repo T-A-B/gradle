@@ -137,7 +137,7 @@ class DefaultTaskExecutionGraphSpec extends AbstractExecutionPlanSpec {
         failures == [failure]
     }
 
-    def "stops running tasks and fails with exception when build is cancelled"() {
+    def "stops running nodes and fails with exception when build is cancelled"() {
         def a = task("a")
         def b = task("b")
 
@@ -153,7 +153,7 @@ class DefaultTaskExecutionGraphSpec extends AbstractExecutionPlanSpec {
         executedTasks == [a]
     }
 
-    def "does not fail with exception when build is cancelled after last task has started"() {
+    def "does not fail with exception when build is cancelled after last node has started"() {
         def a = task("a")
         def b = task("b")
 
